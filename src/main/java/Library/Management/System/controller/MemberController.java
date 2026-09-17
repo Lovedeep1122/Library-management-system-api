@@ -2,6 +2,7 @@ package Library.Management.System.controller;
 
 import Library.Management.System.entity.Member;
 import Library.Management.System.repository.MemberRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,9 @@ public class MemberController {
 
     // CREATE a new member
     @PostMapping
-    public ResponseEntity<?> createMember(@RequestBody Member member) {
-        // Prevent duplicate emails
+    // @Valid tells Spring Boot: "Check the annotations in the Member class before running this code!"
+    public ResponseEntity<?> createMember(@Valid @RequestBody Member member) {
+
         if (memberRepository.existsByEmail(member.getEmail())) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

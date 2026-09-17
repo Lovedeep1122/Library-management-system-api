@@ -1,5 +1,6 @@
 package Library.Management.System.service;
 
+import Library.Management.System.Dto.BorrowingRecordResponseDTO;
 import Library.Management.System.entity.Book;
 import Library.Management.System.entity.BorrowingRecord;
 import Library.Management.System.entity.Member;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+
 @Service
 public class LibraryService {
 
@@ -56,5 +59,48 @@ public class LibraryService {
 
         // 6. Save and return the record
         return borrowingRecordRepository.save(record);
+    }
+
+    @Transactional
+    public BorrowingRecordResponseDTO returnBook(Long memberId, Long bookId) {
+
+        // 1. Find the active borrowing record. We need to find the record where
+        // the member ID matches, the book ID matches, and it hasn't been returned yet.
+        List<BorrowingRecord> records = borrowingRecordRepository.findByMemberId(memberId);
+
+        BorrowingRecord activeRecord = records.stream()
+                .filter(record -> record.getBook().getId().equals(bookId)
+                        && "BORROWED".equals(record.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No active borrowing record found for this member and book."));
+
+        // 2. Mark the record as returned and log the return date
+        activeRecord.setStatus("RETURNED");
+        activeRecord.setReturnDate(LocalDate.now());
+        borrowingRecordRepository.save(activeRecord);
+
+        // 3. Find the book and increase the inventory
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found."));
+        book.setAvailableCopies(book.getAvailableCopies() + 1);
+        bookRepository.save(book);
+
+        // 4. Convert the entity right before sending it back
+        return convertToDTO(activeRecord);
+    }
+
+    // Helper method to convert Entity to DTO
+    private BorrowingRecordResponseDTO convertToDTO(BorrowingRecord record) {
+        BorrowingRecordResponseDTO dto = new BorrowingRecordResponseDTO();
+        dto.setRecordId(record.getId());
+        dto.setBookTitle(record.getBook().getTitle()); // Extract just the string!
+
+        // Combine first and last name for a cleaner response
+        dto.setMemberName(record.getMember().getFirstName() + " " + record.getMember().getLastName());
+
+        dto.setBorrowDate(record.getBorrowDate());
+        dto.setReturnDate(record.getReturnDate());
+        dto.setStatus(record.getStatus());
+        return dto;
     }
 }

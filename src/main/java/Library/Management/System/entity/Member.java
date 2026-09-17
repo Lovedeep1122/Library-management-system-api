@@ -1,6 +1,9 @@
 package Library.Management.System.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,15 +19,20 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
      private Long id;
 
+    @NotBlank(message = "First name is mandatory")
     @Column(nullable = false, length = 50)
     private String firstName;
 
+    @NotBlank(message = "Last name is mandatory")
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @NotBlank(message = "Email is mandatory")
+    @Email(message = "Email format must be valid")
     @Column(nullable = false, unique = true,length = 100)
     private String email;
 
+    @PastOrPresent(message = "Join date cannot be in the future")
     @Column(nullable = false)
     private LocalDate birthDate;
 
