@@ -26,9 +26,9 @@ A robust RESTful backend API built with **Java** and **Spring Boot** to manage l
 *   `GET /members` - Retrieve all registered members
 
 ### Borrowing Operations
-*   `POST /api/borrow/{memberId}/{bookId}` - Borrow a book (decreases inventory, sets status to "BORROWED")
-*   `PUT /api/borrow/return/{memberId}/{bookId}` - Return a book (increases inventory, updates return date)
-*   `GET /api/borrow` - View complete borrowing history
+*   `POST /borrow/{memberId}/{bookId}` - Borrow a book (decreases inventory, sets status to "BORROWED")
+*   `PUT /borrow/return/{memberId}/{bookId}` - Return a book (increases inventory, updates return date)
+*   `GET /borrow` - View complete borrowing history
 
 ## 💡 Technical Challenges Solved
 **The Circular Reference Problem:** Initially, querying borrowing records resulted in a `StackOverflowError` due to bi-directional JPA relationships between Books and Records. 
